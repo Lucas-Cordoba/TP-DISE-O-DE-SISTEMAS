@@ -1,0 +1,8 @@
+.max-height-400 {
+    max-height: 400px;
+    object-fit: contain;
+  }
+  
+  .cursor-pointer{
+    cursor: pointer;
+  }

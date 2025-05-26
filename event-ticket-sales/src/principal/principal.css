@@ -1,0 +1,36 @@
+body{
+    background-color: rgb(173, 150, 115);
+}
+
+.event-image {
+    height: 200px;
+    object-fit: cover; 
+}
+
+.mb-80 {
+    margin-bottom: 80px;
+}
+
+
+.bs{
+    box-shadow: 10px 10px 10px rgb(59, 52, 52);
+  }
+
+  .bc{
+    background-color: rgb(204, 202, 202);
+  }
+
+
+.boton:hover{
+    background-color: black;
+    color:rgb(218, 218, 185);
+}
+  
+
+.card {
+    transition: transform 0.2s; /* Transición suave */
+}
+
+.card:hover {
+    transform: scale(1.05); /* Aumenta el tamaño un 5% al pasar el mouse */
+}
