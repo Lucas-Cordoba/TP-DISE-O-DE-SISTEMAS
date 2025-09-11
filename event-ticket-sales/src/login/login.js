@@ -10,19 +10,36 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate(); // Hook de navegación para redireccionar
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Resetea cualquier mensaje de error anterior
-
-    // 🔧 BACKEND: Aquí iría la llamada a la API para iniciar sesión y obtener el token.
-    // Por ahora, solo simula un login exitoso para continuar con la navegación.
-    
-    if(email && password){
-      // Simulamos login exitoso
-      // localStorage.setItem('token', 'token-simulado'); // Descomenta cuando implementes backend
-      navigate('/'); // Redirige al usuario a la página de inicio
-    } else {
+    setError("");
+  
+    if (!email || !password) {
       setError("Por favor ingresa email y contraseña");
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://localhost:4000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        setError(data.message || "Error al iniciar sesión");
+      } else {
+        // Guarda token en localStorage
+        localStorage.setItem("token", data.token);
+        // Redirige a la página principal (o dashboard)
+        navigate("/");
+      }
+    } catch (err) {
+      setError("Error de conexión. Intenta más tarde.");
     }
   };
 

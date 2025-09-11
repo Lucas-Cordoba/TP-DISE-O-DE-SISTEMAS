@@ -5,43 +5,24 @@ import { Link } from "react-router-dom";
 
 const Principal = () => {
   const [events, setEvents] = useState([]);
-  const [configurations, setConfigurations] = useState({ description: "" });
 
   useEffect(() => {
-    // 🔧 BACKEND: Aquí podrías obtener configuraciones desde Firebase o API
+    fetch("http://localhost:4000/events")
+      .then((res) => {
+        if (!res.ok) throw new Error("No se pudo cargar eventos");
+        return res.json();
+      })
+      .then((data) => {
+        // Ordenar por fecha descendente y tomar los 3 últimos
+        const ultimosTres = data
+          .sort((a, b) => (b.id) - (a.id))
+          .slice(0, 3);
 
-    // Datos simulados para frontend:
-    const fakeConfig = {
-      description: "Somos un organizador de eventos con la mejor experiencia."
-    };
-    setConfigurations(fakeConfig);
-  }, []);
-
-  useEffect(() => {
-    // 🔧 BACKEND: Aquí podrías obtener próximos eventos desde Firebase o API
-
-    // Datos simulados para frontend:
-    const fakeEvents = [
-      {
-        id: 1,
-        name: "Concierto Rock",
-        price: 1500,
-        date: "2025-06-10T00:00:00Z"
-      },
-      {
-        id: 2,
-        name: "Festival Jazz",
-        price: 2000,
-        date: "2025-07-05T00:00:00Z"
-      },
-      {
-        id: 3,
-        name: "Obra de Teatro",
-        price: 1200,
-        date: "2025-08-12T00:00:00Z"
-      }
-    ];
-    setEvents(fakeEvents);
+        setEvents(ultimosTres);
+      })
+      .catch((err) => {
+        console.error("Error al cargar eventos:", err);
+      });
   }, []);
 
   const formatFecha = (fecha) => {
@@ -74,7 +55,9 @@ const Principal = () => {
                     {event.name}
                   </h5>
                   <p className="card-text fs-5 text-success">${event.price}</p>
-                  <p className="card-text text-muted">{formatFecha(event.date)}</p>
+                  <p className="card-text text-muted">
+                    {formatFecha(event.date)}
+                  </p>
                   <Link
                     to={`/detalles/${event.id}`}
                     className="btn btn-dark fs-6 fw-bold boton"
@@ -99,7 +82,7 @@ const Principal = () => {
             />
           </div>
           <div className="col-md-6 d-flex align-items-center">
-            <p>{configurations.description}</p>
+            <p>Somos un organizador de eventos con la mejor experiencia.</p>
           </div>
         </div>
       </div>

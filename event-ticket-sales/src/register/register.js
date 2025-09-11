@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Register = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -10,28 +11,37 @@ const Register = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");  // Reseteamos error
-
+  const handleSubmit = async (e) => { e.preventDefault();
+    setError("");
+    setSuccess("");
+  
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden");
       return;
     }
-
+  
     try {
-      // 🔧 BACKEND: Aquí iría la llamada a Firebase Auth para registrar usuario
-      // Por ejemplo:
-      // await firebaseAuth.createUserWithEmailAndPassword(email, password);
-
-      // Por ahora simulamos éxito:
+      const response = await fetch("http://localhost:4000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }), // Si tu backend espera el name, asegúrate de tenerlo en el state
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        setError(data.message || "Error al registrar");
+        return;
+      }
+  
       setSuccess("Registro exitoso, redirigiendo...");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      // Puedes mapear errores de Firebase aquí cuando integres
-      setError("Error al registrar. Inténtalo más tarde.");
+      setError("Error en la conexión con el servidor");
     }
   };
 
@@ -51,6 +61,17 @@ const Register = () => {
           {error && <div className="alert alert-danger">{error}</div>}
           {success && <div className="alert alert-success">{success}</div>}
           <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+              <label htmlFor="name" className="form-label">Nombre</label>
+              <input
+                type="name"
+                className="form-control"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
             <div className="mb-3">
               <label htmlFor="email" className="form-label">Correo Electrónico</label>
               <input

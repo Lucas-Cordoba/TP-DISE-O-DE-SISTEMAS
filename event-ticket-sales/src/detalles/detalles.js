@@ -1,44 +1,37 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./detalles.css";
-
-const eventos = [
-  {
-    id: "1",
-    name: "Concierto Rock",
-    price: 50,
-    description: "Un gran concierto de rock con bandas famosas.",
-    location: { name: "Estadio Nacional" },
-  },
-  {
-    id: "2",
-    name: "Feria de Arte",
-    price: 20,
-    description: "Exposición de arte local e internacional.",
-    location: { name: "Centro Cultural" },
-  },
-  {
-    id: "3",
-    name: "Festival de Jazz",
-    price: 35,
-    description: "Tres días de música jazz en vivo en el parque.",
-    location: { name: "Parque Central" },
-  },
-];
 
 const Detalles = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Buscar evento localmente según el id
-  const event = eventos.find((e) => e.id === id);
+  const [evento, setEvento] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!event) {
-    return <p className="text-center mt-5">No se encontró el evento.</p>;
-  }
+  useEffect(() => {
+    fetch(`http://localhost:4000/events/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Evento no encontrado");
+        return res.json();
+      })
+      .then((data) => {
+        setEvento(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [id]);
 
-  const { name, price, description, location } = event;
+
+  if (loading) return <p className="text-center mt-5">Cargando...</p>;
+  if (error) return <p className="text-center mt-5">{error}</p>;
+
+  const { name, price, description, location } = evento;
 
   return (
     <div className="container mt-4 py-5">
@@ -54,7 +47,7 @@ const Detalles = () => {
         <div className="col-md-6">
           <h2 className="text-center mb-4">{name}</h2>
           <p className="h5 text-center">Precio: ${price}</p>
-          <p className="h5 text-center">Localidad: {location?.name}</p>
+          <p className="h5 text-center">Localidad: {location}</p>
           <p className="text-center">{description}</p>
         </div>
       </div>

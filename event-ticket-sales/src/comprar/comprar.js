@@ -6,21 +6,21 @@ import "./comprar.css";
 const eventos = [
   {
     id: "1",
-    name: "Concierto Rock",
+    name: "Los Herrera",
     price: 50,
     description: "Un gran concierto de rock con bandas famosas.",
     location: { name: "Estadio Nacional" },
   },
   {
     id: "2",
-    name: "Feria de Arte",
+    name: "DesaKTa2",
     price: 20,
     description: "Exposición de arte local e internacional.",
     location: { name: "Centro Cultural" },
   },
   {
     id: "3",
-    name: "Festival de Jazz",
+    name: "FUlises Bueno",
     price: 35,
     description: "Tres días de música jazz en vivo en el parque.",
     location: { name: "Parque Central" },
@@ -36,7 +36,17 @@ const Comprar = () => {
 
   // Estado para cantidad y entradas
   const [cantidad, setCantidad] = useState(1);
-  const [entradas, setEntradas] = useState([{ nombre: "", apellido: "", dni: "" }]);
+  const [entradas, setEntradas] = useState([
+    { nombre: "", apellido: "", dni: "" },
+  ]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Debes iniciar sesión para comprar entradas.");
+      navigate("/login");
+    }
+  }, [navigate]);
 
   // Ajustar entradas según cantidad
   const handleCantidadChange = (e) => {
@@ -44,7 +54,8 @@ const Comprar = () => {
     setCantidad(newCantidad);
     setEntradas((oldEntradas) => {
       const nuevas = [...oldEntradas];
-      while (nuevas.length < newCantidad) nuevas.push({ nombre: "", apellido: "", dni: "" });
+      while (nuevas.length < newCantidad)
+        nuevas.push({ nombre: "", apellido: "", dni: "" });
       return nuevas.slice(0, newCantidad);
     });
   };
@@ -60,14 +71,42 @@ const Comprar = () => {
     return <p className="text-center mt-5">No se encontró el evento.</p>;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí simulamos la compra sin backend
-    alert("Compra realizada con éxito!");
-    // Reiniciar formulario y volver a lista o home
-    setCantidad(1);
-    setEntradas([{ nombre: "", apellido: "", dni: "" }]);
-    navigate("/mis-compras"); // o a donde prefieras
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Debes iniciar sesión para comprar entradas.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:4000/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          eventId: id,
+          cantidad,
+          entradas,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Error al realizar la compra");
+      }
+
+      alert("Compra realizada con éxito!");
+      setCantidad(1);
+      setEntradas([{ nombre: "", apellido: "", dni: "" }]);
+      navigate("/mis-compras");
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -113,7 +152,9 @@ const Comprar = () => {
                       className="form-control w-50"
                       id={`nombre-${index}`}
                       value={entrada.nombre}
-                      onChange={(e) => handleChange(index, "nombre", e.target.value)}
+                      onChange={(e) =>
+                        handleChange(index, "nombre", e.target.value)
+                      }
                       required
                     />
                   </div>
@@ -126,7 +167,9 @@ const Comprar = () => {
                       className="form-control w-50"
                       id={`apellido-${index}`}
                       value={entrada.apellido}
-                      onChange={(e) => handleChange(index, "apellido", e.target.value)}
+                      onChange={(e) =>
+                        handleChange(index, "apellido", e.target.value)
+                      }
                       required
                     />
                   </div>
@@ -139,7 +182,9 @@ const Comprar = () => {
                       className="form-control w-50"
                       id={`dni-${index}`}
                       value={entrada.dni}
-                      onChange={(e) => handleChange(index, "dni", e.target.value)}
+                      onChange={(e) =>
+                        handleChange(index, "dni", e.target.value)
+                      }
                       required
                     />
                   </div>
